@@ -1,0 +1,11 @@
+local Sky = {
+    Enabled = true,
+    Velocity = 0.45
+}
+
+game:GetService("RunService").Heartbeat:Connect(function()
+if Sky.Enabled == true then
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, -Sky.Velocity + 0.05, 0)
+end
+end)
+--// Credits to Dashy/Dusty

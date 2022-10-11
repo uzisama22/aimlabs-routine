@@ -1,0 +1,16 @@
+getgenv().Key = "q"
+getgenv().HitBox = "HumanoidRootPart"
+getgenv().Smoothness = 0.54375430 -- Stay Under 2 To Be legit --
+loadstring(game:HttpGet("https://pastebin.com/raw/LDDRM9hB", true))()
+
+--sets 
+0.0459
+0.0095
+0.0051
+0.0322
+0.058
+0.047626
+0.0986856
+0.0488
+0.0567
+0.037

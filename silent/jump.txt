@@ -1,0 +1,9 @@
+Sexaa = true
+
+if sexaa == true then
+if game.PlayersLocalPlayer.Character.Humanoid:GetState() ~= Enum.HumanoidStateType.Freefall then
+Sexing = game.Players.LocalPlayer.Character.HumanoidRootPart.Velocity
+game.PlayersLocalPlayer.Character.Humanoid:
+ChangeState("Jumping")
+end
+end

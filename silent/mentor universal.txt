@@ -1,0 +1,131 @@
+--[[
+
+Credits To Noss For Silent Aim \ Credits To Mentor/Demoted/Scars/Cottonpicker For Optimization And Silent Editing \ Credit To Mentor/Demoted/Scars/Cottonpicker For Fps Fix
+
+
+local L_1_, L_2_, L_3_, L_4_, L_5_, L_6_, L_7_, L_8_, L_9_, L_10_, L_11_, L_12_, L_13_, L_14_, L_15_, L_16_ = CFrame.new, Color3.new, coroutine.wrap, Drawing.new, getgenv, getconnections, ipairs, task.wait, Vector2.new, spawn, pcall, pairs, Ray.new, table.find, Vector3.new, hookmetamethod
+
+L_5_().Prediction =  (  .18  )
+
+L_5_().FOV =  (  80  )
+
+L_5_().AimKey =  (  "p"  )
+
+L_5_().DontShootThesePeople = {
+
+	"sonnyuwugangagn";
+	"sonnyuwugangagn";
+
+}
+
+local L_17_ = true
+local L_18_ = game:GetService("Players").LocalPlayer
+local L_19_ = game:GetService("Players")
+local L_20_ = L_18_:GetMouse()
+local L_21_ = game:GetService("Workspace").CurrentCamera
+local L_22_ = L_6_(game:GetService("LogService").MessageOut)
+for L_27_forvar0, L_28_forvar1 in L_7_(L_22_) do
+	L_28_forvar1:Disable()
+end
+
+getrawmetatable = getrawmetatable
+setreadonly = setreadonly
+L_6_ = L_6_
+L_16_ = L_16_
+L_5_ = L_5_
+Drawing = Drawing
+
+local L_23_ = L_4_("Circle")
+L_23_.Visible = true
+L_23_.Filled = false
+L_23_.Thickness = 1
+L_23_.Transparency = 1
+L_23_.Color = L_2_(0, 1, 0)
+L_23_.Radius = L_5_().FOV
+L_23_.Position = L_9_(L_21_.ViewportSize.X / 2, L_21_.ViewportSize.Y / 2)
+
+Options = {
+	Torso = "UpperTorso";
+	Head = "Head";
+}
+
+local function L_24_func()
+	L_11_(function()
+		local L_29_ = true
+		L_10_(function()
+			while L_29_ do
+				L_8_()
+				L_23_.Position = L_9_(L_20_.X, (L_20_.Y + 36))
+			end
+		end)
+	end)
+end
+L_3_(L_24_func)()
+L_20_.KeyDown:Connect(function(L_30_arg0)
+	if L_30_arg0 == (L_5_().AimKey:lower()) then
+		if L_17_ == false then
+			L_23_.Color = L_2_(0, 1, 0)
+			L_17_ = true
+		elseif L_17_ == true then
+			L_23_.Color = L_2_(1, 0, 0)
+			L_17_ = false
+		end
+	end
+end)
+local L_25_ = nil
+L_25_ = L_16_(game, "__index", function(L_33_arg0, L_34_arg1, L_35_arg2)
+	local L_36_ = L_25_(L_33_arg0, L_34_arg1)
+	local L_37_ = L_20_
+	local L_38_ = "hit"
+	local L_39_ = L_38_
+	if L_33_arg0 == L_37_ and (L_34_arg1:lower() == L_39_) then
+		local L_40_ = 9
+		local L_41_ = nil
+		local L_42_ = game:GetService("Players")
+		local L_43_ = game:GetService("Players").LocalPlayer
+		local L_44_ = game:GetService("Workspace").CurrentCamera
+		for L_45_forvar0, L_46_forvar1 in L_12_(L_42_:GetPlayers()) do
+			if not L_14_(L_5_().DontShootThesePeople, L_46_forvar1.Name) then
+				if L_46_forvar1 ~= L_43_ and L_46_forvar1.Character and L_46_forvar1.Character:FindFirstChild("HumanoidRootPart") and L_46_forvar1.Character:FindFirstChild("Humanoid") and L_46_forvar1.Character:FindFirstChild("Humanoid").Health > 0 then
+					local L_47_ = L_46_forvar1.Character
+					local L_48_ = L_1_(L_44_.CFrame.Position, L_47_[Options.Torso].CFrame.Position) * L_1_(0, 0, -4)
+					local L_49_ = L_13_(L_48_.Position, L_48_.LookVector * 9000)
+					local L_50_, L_51_ = game:GetService("Workspace"):FindPartOnRayWithIgnoreList(L_49_, {
+						L_43_.Character:FindFirstChild("Head")
+					})
+					local L_52_ = (L_47_[Options.Torso].CFrame.Position - L_51_).magnitude
+					if L_52_ < 4 then
+						local L_53_, L_54_ = L_44_:WorldToScreenPoint(L_47_[Options.Torso].Position)
+						if L_54_ then
+							local L_55_ = (L_9_(L_20_.X, L_20_.Y) - L_9_(L_53_.X, L_53_.Y)).Magnitude
+							if L_55_ < L_40_ and L_55_ < L_23_.Radius then
+								L_40_ = L_55_
+								L_41_ = L_47_
+							end
+						end
+					end
+				end
+			end
+		end
+
+		if L_41_ ~= nil and L_41_[Options.Torso] and L_41_:FindFirstChild("Humanoid") and L_41_:FindFirstChild("Humanoid").Health > 0 then
+			local L_56_ = L_41_[Options.Torso]
+			local L_57_ = L_56_.CFrame + (L_56_.AssemblyLinearVelocity * L_5_().Prediction + L_15_(0, -1, 0))
+			return (L_34_arg1:lower() == L_39_ and L_57_)
+		end
+		return L_36_
+	end
+	return L_25_(L_33_arg0, L_34_arg1, L_36_)
+end)
+local L_26_ = game:GetService("RunService")
+L_26_.Heartbeat:Connect(function()
+	L_11_(function()
+		for L_58_forvar0, L_59_forvar1 in L_12_(game.Players:GetChildren()) do
+			if L_59_forvar1.Name ~= game.Players.LocalPlayer.Name then
+				local L_60_ = L_59_forvar1.Character.HumanoidRootPart
+				L_60_.Velocity = L_15_(L_60_.Velocity.X, 0, L_60_.Velocity.Z)
+				L_60_.AssemblyLinearVelocity = L_15_(L_60_.Velocity.X, 0, L_60_.Velocity.Z)
+			end
+		end
+	end)
+end)
