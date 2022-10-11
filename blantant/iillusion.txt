@@ -1,0 +1,505 @@
+local repo = 'https://raw.githubusercontent.com/wally-rblx/LinoriaLib/main/'
+
+local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
+local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))()
+local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
+
+
+local Window = Library:CreateWindow({
+
+
+    Title = 'Illusion.lua | Rewrite',
+    Center = true, 
+    AutoShow = true,
+})
+
+local Tabs = {
+    Aiming = Window:AddTab('Aiming'), 
+    Rage = Window:AddTab('Rage'),
+    Visuals = Window:AddTab('Visuals'),
+    Teleports = Window:AddTab('Teleports'),
+    Animations = Window:AddTab('Animations'),
+    Misc = Window:AddTab('Misc'),
+ ['UI Settings'] = Window:AddTab('Configs')    
+}
+
+local LeftGroupBox = Tabs.Aiming:AddLeftGroupbox('Target')
+local LeftGroupBox1 = Tabs.Aiming:AddRightGroupbox('Aimbot')
+
+
+getgenv().Aiming = { 
+    Target = { 
+        Enabled = false,
+        Prediction = 0.1337,
+        AirshotFunc = false,
+        Part = "HumanoidRootPart", -- Head UpperTorso HumanoidRootPart LowerTorso
+        AirshotPart = "LowerTorso", -- i use rightfoot and rightarm
+        Key = "c",
+        Notifications = true,
+        Toggle = false
+    },
+    TargetExtras = { 
+        SpectatePlayer = false,
+        TeleportToPlayer = false
+    }
+}
+
+local CurrentCamera = game:GetService("Workspace").CurrentCamera
+local Mouse = game.Players.LocalPlayer:GetMouse()
+local RunService = game:GetService("RunService")
+local Plr = game.Players.LocalPlayer
+local lp = game.Players.LocalPlayer
+
+
+getgenv().Show = false
+_G.Color = Color3.fromRGB(255, 255, 255)
+_G.Size = Vector3.new(0.9, 1.2, 0.9)
+
+local Part = Instance.new("Part", game.Workspace)
+Part.Anchored = true
+Part.CanCollide = false
+Part.Parent = game.Workspace
+Part.Shape = Enum.PartType.Ball
+Part.Size = _G.Size
+Part.Color = _G.Color
+Part.Transparency = 1
+
+
+
+Mouse.KeyDown:Connect(function(KeyPressed)
+    if KeyPressed == (getgenv().Aiming.Target.Key) then
+        if getgenv().Aiming.Target.Toggle == true then
+        if getgenv().Aiming.Target.Enabled == true then
+            getgenv().Aiming.Target.Enabled = false
+            if getgenv().Aiming.Target.Notifications == true then
+                Plr = FindClosestUser()
+                game.StarterGui:SetCore("SendNotification", {       -------------- all of this is if key is pressed the notification will pop up and will lock on to the closest player via m2p
+                    Title = "illusion.lua",
+                    Text = "No longer locked on"
+                })
+            end
+            if getgenv().Aiming.TargetExtras.SpectatePlayer == true then
+                game.Workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character
+            end
+            while getgenv().Show == true do
+                wait()
+                Part.Transparency = 0
+            end
+            while getgenv().Show == false do
+                wait()
+                Part.Transparency = 1
+            end
+        else
+            Plr = FindClosestUser()
+            getgenv().Aiming.Target.Enabled = true
+            if getgenv().Aiming.Target.Notifications == true then
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "illusion.lua",
+                    Text = "Locked on to:" .. tostring(Plr.Character.Humanoid.DisplayName)
+                })
+            end
+            if getgenv().Aiming.TargetExtras.SpectatePlayer == true then
+                game.Workspace.CurrentCamera.CameraSubject = Plr.Character
+            end
+            if getgenv().Aiming.TargetExtras.TeleportToPlayer == true then
+                lp.Character.HumanoidRootPart.CFrame = Plr.Character.HumanoidRootPart.CFrame
+            end
+        end
+    end
+end
+end)
+
+function FindClosestUser()
+    local closestPlayer
+    local shortestDistance = math.huge
+
+    for i, v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer and v.Character and v.Character:FindFirstChild("Humanoid") and
+            v.Character.Humanoid.Health ~= 0 and v.Character:FindFirstChild("HumanoidRootPart") then
+            local pos = CurrentCamera:WorldToViewportPoint(v.Character.PrimaryPart.Position)
+            local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).magnitude     -- this getclosestplayer function is ass but it works ig
+            if magnitude < shortestDistance then
+                closestPlayer = v
+                shortestDistance = magnitude
+            end
+        end
+    end
+    return closestPlayer
+end
+
+
+
+
+
+
+
+
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
+mt.__namecall = newcclosure(function(...)
+    local args = {...}
+    if getgenv().Aiming.Target.Enabled and getnamecallmethod() == "FireServer" and args[2] == "UpdateMousePos" then
+        args[3] = Plr.Character[getgenv().Aiming.Target.Part].Position +
+                      (Plr.Character[getgenv().Aiming.Target.Part].Velocity * getgenv().Aiming.Target.Prediction)           ----- MAIN
+        return old(unpack(args))
+    end
+    return old(...)
+end)
+
+-- airshot function bellow then end of target code
+
+if getgenv().Aiming.Target.AirshotFunc == true then
+    if Plr.Character.Humanoid.Jump == true and Plr.Character.Humanoid.FloorMaterial == Enum.Material.Air then
+        getgenv().Aiming.Target.Part = getgenv().Aiming.Target.AirshotPart
+    else
+        Plr.Character:WaitForChild("Humanoid").StateChanged:Connect(function(old,new)
+            if new == Enum.HumanoidStateType.Freefall then
+                getgenv().Aiming.Target.Part = getgenv().Aiming.Target.AirshotPart
+            else
+                getgenv().Aiming.Target.Part = "LowerTorso"
+            end
+        end)
+    end
+end
+
+
+
+
+
+
+
+
+RunService.Stepped:connect(function()
+    if getgenv().Aiming.Target.Enabled and Plr.Character and Plr.Character:FindFirstChild("LowerTorso") then
+        Part.CFrame = CFrame.new(Plr.Character[getgenv().Aiming.Target.Part].Position +
+                                     (Plr.Character.LowerTorso.Velocity * getgenv().Aiming.Target.Prediction))
+    else
+        Part.CFrame = CFrame.new(0, 9999, 0)
+
+    end
+end)
+
+
+getgenv().Aimbot = { 
+    Enabled = false,
+    Smoothness = 0.005,
+    Smoothing = false,
+    AirshotFunc = false,
+    AirshotPart = "RightFoot",
+    AimPart = "HumanoidRootPart",
+    Predicting = 1.2,
+    Key = Enum.KeyCode.Q,
+    Toggled
+}
+
+
+function x(tt,tx,cc)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = tt;
+        Text = tx;
+        Duration = cc;
+        Icon = "rbxthumb://type=Asset&id=7262533709&w=150&h=150";
+    })
+end
+
+local CurrentCamera = game:GetService("Workspace").CurrentCamera
+local RunService = game:GetService("RunService")
+local Mouse = game.Players.LocalPlayer:GetMouse()
+local LocalPlayer = game.Players.LocalPlayer
+local Plr
+
+function FindClosestPlayer()
+    local ClosestDistance, ClosestPlayer = math.huge, nil;
+    for _, Player in next, game:GetService("Players"):GetPlayers() do
+        local ISNTKNOCKED = Player.Character:WaitForChild("BodyEffects")["K.O"].Value ~= true
+        local ISNTGRABBED = Player.Character:FindFirstChild("GRABBING_COINSTRAINT") == nil
+
+        if Player ~= LocalPlayer then
+            local Character = Player.Character
+            if Character and Character.Humanoid.Health > 1 and ISNTKNOCKED and ISNTGRABBED then
+                local Position, IsVisibleOnViewPort = CurrentCamera:WorldToViewportPoint(Character.HumanoidRootPart
+                                                                                             .Position)
+                if IsVisibleOnViewPort then
+                    local Distance = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(Position.X, Position.Y)).Magnitude
+                    if Distance < ClosestDistance then
+                        ClosestPlayer = Player
+                        ClosestDistance = Distance
+                    end
+                end
+            end
+        end
+    end
+    return ClosestPlayer, ClosestDistance
+end
+
+
+
+    game:GetService("UserInputService").InputBegan:Connect(function(keygo)
+           if (keygo.KeyCode == getgenv().Aimbot.Key) then
+               Toggled = not Toggled
+               if Toggled then
+               Plr =  FindClosestPlayer()
+end
+         end
+           
+end)
+game:GetService("RunService").RenderStepped:Connect(function()
+if getgenv().Aimbot.Smoothing and getgenv().Aimbot.Enabled and Toggled == true then
+    local Main = CFrame.new(workspace.CurrentCamera.CFrame.p, Plr.Character[getgenv().Aimbot.AimPart].Position + Plr.Character[getgenv().Aimbot.AimPart].Velocity*getgenv().Aimbot.Predicting/10)
+                                 workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame:Lerp(Main, getgenv().Aimbot.Smoothness, Enum.EasingStyle.Elastic, Enum.EasingDirection.InOut)
+                            elseif getgenv().Aimbot.Smoothing == false and getgenv().Aimbot.Enabled and Toggled == true then
+    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, Plr.Character[getgenv().Aimbot.AimPart].Position + Plr.Character[getgenv().Aimbot.AimPart].Velocity*getgenv().Aimbot.Predicting/10)
+                            end
+
+end)
+
+if getgenv().Aimbot.AirshotFunc == true then
+    
+                if Plr.Character.Humanoid.Jump == true and Plr.Character.Humanoid.FloorMaterial == Enum.Material.Air then
+                    getgenv().Aimbot.AimPart = getgenv().Aimbot.AirshotPart
+                else
+                    Plr.Character:WaitForChild("Humanoid").StateChanged:Connect(function(old,new)
+                        if new == Enum.HumanoidStateType.Freefall then
+                        getgenv().Aimbot.AimPart = getgenv().Aimbot.AirshotPart
+                        else
+                            getgenv().Aimbot.AimPart = getgenv().Aimbot.AimPart
+                        end
+                    end)
+                end
+            end
+
+
+
+
+
+LeftGroupBox:AddToggle('MyToggle', {
+    Text = 'Enable Target',
+    Default = false, -- Default value (true / false)
+    Tooltip = 'Target Aim Toggle', -- Information shown when you hover over the toggle
+})
+
+LeftGroupBox:AddToggle('MyToggle1', {
+    Text = 'Airshot Function',
+    Default = false, -- Default value (true / false)
+    Tooltip = 'Airshot Function Toggle', -- Information shown when you hover over the toggle
+})
+
+LeftGroupBox:AddToggle('MyToggle2', {
+    Text = 'Visualize Prediction',
+    Default = false, -- Default value (true / false)
+    Tooltip = 'Visualises Prediction', -- Information shown when you hover over the toggle
+})
+
+LeftGroupBox:AddToggle('MyToggle3', {
+    Text = 'Teleport Mode',
+    Default = false, -- Default value (true / false)
+    Tooltip = 'Teleports To Target', -- Information shown when you hover over the toggle
+})
+
+LeftGroupBox:AddToggle('MyToggle4', {
+    Text = 'Spectate Mode',
+    Default = false, -- Default value (true / false)
+    Tooltip = 'Spectates Target', -- Information shown when you hover over the toggle
+})
+
+LeftGroupBox1:AddToggle('MyToggle5', {
+    Text = 'Enable Aimbot',
+    Default = false, -- Default value (true / false)
+    Tooltip = 'Q To Lock on', -- Information shown when you hover over the toggle
+})
+
+LeftGroupBox1:AddToggle('MyToggle6', {
+    Text = 'Airshot Function',
+    Default = false, -- Default value (true / false)
+    Tooltip = 'Enables Airshot Function', -- Information shown when you hover over the toggle
+})
+
+LeftGroupBox1:AddToggle('MyToggle7', {
+    Text = 'Smoothing',
+    Default = false, -- Default value (true / false)
+    Tooltip = 'Enables Smoothing', -- Information shown when you hover over the toggle
+})
+
+Toggles.MyToggle:OnChanged(function()
+    getgenv().Aiming.Target.Toggle = Toggles.MyToggle.Value
+end)
+
+Toggles.MyToggle1:OnChanged(function()
+    getgenv().Aiming.Target.AirshotFunc = Toggles.MyToggle1.Value
+end)
+
+Toggles.MyToggle2:OnChanged(function()
+    getgenv().Show = Toggles.MyToggle2.Value
+end)
+
+Toggles.MyToggle3:OnChanged(function()
+    getgenv().Aiming.TargetExtras.TeleportToPlayer = Toggles.MyToggle3.Value
+end)
+
+Toggles.MyToggle4:OnChanged(function()
+    getgenv().Aiming.TargetExtras.SpectatePlayer = Toggles.MyToggle4.Value
+end)
+
+Toggles.MyToggle5:OnChanged(function()
+    getgenv().Aimbot.Enabled = Toggles.MyToggle5.Value
+end)
+
+Toggles.MyToggle6:OnChanged(function()
+    getgenv().Aimbot.AirshotFunc = Toggles.MyToggle6.Value
+end)
+
+
+Toggles.MyToggle7:OnChanged(function()
+    getgenv().Aimbot.Smoothing = Toggles.MyToggle7.Value
+end)
+
+LeftGroupBox:AddInput('MyTextbox', {
+    Default = '0.11621',
+    Numeric = false, -- true / false, only allows numbers
+    Finished = false, -- true / false, only calls callback when you press enter
+
+    Text = 'Prediction',
+    Tooltip = 'Edits target prediction velocity', -- Information shown when you hover over the textbox
+
+    Placeholder = '0.11621', -- placeholder text when the box is empty
+    -- MaxLength is also an option which is the max length of the text
+})
+
+LeftGroupBox1:AddInput('MyTextbox1', {
+    Default = '1.2',
+    Numeric = false, -- true / false, only allows numbers
+    Finished = false, -- true / false, only calls callback when you press enter
+
+    Text = 'Prediction',
+    Tooltip = 'Edits Aimbot prediction velocity', -- Information shown when you hover over the textbox
+
+    Placeholder = '1.2', -- placeholder text when the box is empty
+    -- MaxLength is also an option which is the max length of the text
+})
+
+LeftGroupBox1:AddInput('MyTextbox2', {
+    Default = '0.005',
+    Numeric = false, -- true / false, only allows numbers
+    Finished = false, -- true / false, only calls callback when you press enter
+
+    Text = 'Smoothness',
+    Tooltip = 'Edits Aimbot Smoothness Velocity', -- Information shown when you hover over the textbox
+
+    Placeholder = '0.005', -- placeholder text when the box is empty
+    -- MaxLength is also an option which is the max length of the text
+})
+
+Options.MyTextbox:OnChanged(function()
+    getgenv().Aiming.Target.Prediction = Options.MyTextbox.Value
+end)
+
+Options.MyTextbox1:OnChanged(function()
+    getgenv().Aimbot.Predicting = Options.MyTextbox1.Value
+end)
+
+Options.MyTextbox2:OnChanged(function()
+    getgenv().Aimbot.Smoothness = Options.MyTextbox2.Value
+end)
+
+LeftGroupBox:AddDropdown('MyDropdown', {
+    Values = { 'Head', 'HumanoidRootPart', 'UpperTorso', 'LowerTorso' },
+    Default = 2, -- number index of the value / string
+    Multi = false, -- true / false, allows multiple choices to be selected
+
+    Text = 'Part',
+    Tooltip = 'Changes Target Part', -- Information shown when you hover over the textbox
+})
+
+
+
+Options.MyDropdown:OnChanged(function()
+    getgenv().Aiming.Target.Part = Options.MyDropdown.Value
+end)
+
+local LeftGroupBox = Tabs.Teleports:AddLeftGroupbox('Teleports')
+local MyButton = LeftGroupBox:AddButton('Revolver', function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-642.438049, 21.7499943, -120.54261, -0.996704638, -4.62153764e-08, 0.0811163932, -5.21754728e-08, 1, -7.13562187e-08, -0.0811163932, -7.53533627e-08, -0.996704638)
+    end)
+local MyButton = LeftGroupBox:AddButton('Bank', function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-374.392303, 21.2499924, -287.927338, -0.855447054, -1.72182069e-07, -0.517890275, 2.95946307e-07, 1, -8.21309982e-07, 0.517890275, -8.55854921e-07, -0.855447054)
+end)
+local MyButton = LeftGroupBox:AddButton('Admin Base', function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-872.853516, -34.4276848, -538.013306, -0.999724388, -3.9898886e-08, -0.0234765243, -3.9204977e-08, 1, -3.00177518e-08, 0.0234765243, -2.90890814e-08, -0.999724388)
+
+end)
+local MyButton = LeftGroupBox:AddButton('Rev mountain', function()
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-696.847717, 167.674957, -41.0118256, 0.626992583, 7.53169349e-09, -0.779025197, -1.29610933e-09, 1, 8.62493632e-09, 0.779025197, -4.39806902e-09, 0.626992583)
+    
+end)
+local MyButton = LeftGroupBox:AddButton('Ufo', function()
+     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(2.85052466, 132, -736.571106, -0.0460956171, -4.24733706e-08, -0.998937011, 7.26012459e-08, 1, -4.58687275e-08, 0.998937011, -7.46384217e-08, -0.0460956171)
+    
+end)
+local MyButton = LeftGroupBox:AddButton('RPG', function()
+     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(139.815933, -22.9016266, -136.737762, 0.0339428484, -7.90177737e-08, 0.999423802, -4.7851227e-08, 1, 8.06884728e-08, -0.999423802, -5.0562452e-08, 0.0339428484)
+    end)
+local MyButton = LeftGroupBox:AddButton('Taco', function()
+     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(707.502014, 139, -543.044739, -0.00318608154, -0.00102963799, 0.999993861, 0.000187970581, 0.999999464, 0.00103024102, -0.99999404, 0.00019125198, -0.00318560796)
+    end)
+local MyButton = LeftGroupBox:AddButton('Drum Gun', function()
+      game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-80.8381271, 46.828949, -85.845993, 0.999289691, 4.71884114e-08, 0.0376862474, -4.71660684e-08, 1, -1.48225032e-09, -0.0376862474, -2.96314889e-10, 0.999289691)
+    end)
+local MyButton = LeftGroupBox:AddButton('Rev Roof', function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-634.463135, 80.434761, -204.232559, -0.0190527271, -1.03574322e-07, -0.999818563, 4.36709335e-09, 1, -1.03676342e-07, 0.999818563, -6.3416179e-09, -0.0190527271)
+    end)
+local MyButton = LeftGroupBox:AddButton('PlayGround', function()
+      game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-308.851196, 103.049866, -685.874817, 0.0775452703, 4.43633544e-05, -0.996988416, 4.02679916e-06, 1, 4.48105384e-05, 0.996988416, -7.48951334e-06, 0.0775452703)
+    end)
+local MyButton = LeftGroupBox:AddButton('Gas Station', function()
+       game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(595.925171, 130.75, -346.41568, -0.0400748774, 7.26109022e-08, 0.999196708, 2.20863914e-08, 1, -7.17834538e-08, -0.999196708, 1.91919352e-08, -0.0400748774)
+    end)
+local MyButton = LeftGroupBox:AddButton('GraveYard', function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(135.109558, 99.75, -57.2315979, 0.999993503, -0.000633752206, -0.0035054055, 0.000638642872, 0.999998808, 0.00139435288, 0.00350463158, -0.00139658386, 0.999992728)
+    end)
+local MyButton = LeftGroupBox:AddButton('School Roof', function()
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-525.353455, 68.125, 311.824402, 0.999992013, 1.03866675e-08, -0.00399552286, -1.03507425e-08, 1, 9.01170427e-09, 0.00399552286, -8.97027519e-09, 0.999992013)
+    end)
+
+local LeftGroupBox = Tabs.Animations:AddLeftGroupbox('Animations')
+
+
+local MenuGroup = Tabs['UI Settings']:AddLeftGroupbox('Menu')
+
+-- I set NoUI so it does not show up in the keybinds menu
+MenuGroup:AddButton('Unload', function() Library:Unload() end)
+MenuGroup:AddLabel('Menu bind'):AddKeyPicker('MenuKeybind', { Default = 'End', NoUI = true, Text = 'Menu keybind' }) 
+
+Library.ToggleKeybind = Options.MenuKeybind -- Allows you to have a custom keybind for the menu
+
+-- Addons:
+-- SaveManager (Allows you to have a configuration system)
+-- ThemeManager (Allows you to have a menu theme system)
+
+-- Hand the library over to our managers
+ThemeManager:SetLibrary(Library)
+SaveManager:SetLibrary(Library)
+
+-- Ignore keys that are used by ThemeManager. 
+-- (we dont want configs to save themes, do we?)
+SaveManager:IgnoreThemeSettings() 
+
+-- Adds our MenuKeybind to the ignore list 
+-- (do you want each config to have a different menu key? probably not.)
+SaveManager:SetIgnoreIndexes({ 'MenuKeybind' }) 
+
+-- use case for doing it this way: 
+-- a script hub could have themes in a global folder
+-- and game configs in a separate folder per game
+ThemeManager:SetFolder('MyScriptHub')
+SaveManager:SetFolder('MyScriptHub/specific-game')
+
+-- Builds our config menu on the right side of our tab
+SaveManager:BuildConfigSection(Tabs['UI Settings']) 
+
+-- Builds our theme menu (with plenty of built in themes) on the left side
+-- NOTE: you can also call ThemeManager:ApplyToGroupbox to add it to a specific groupbox
+ThemeManager:ApplyToTab(Tabs['UI Settings'])
+
+-- You can use the SaveManager:LoadAutoloadConfig() to load a config 
+-- which has been marked to be one that auto loads!

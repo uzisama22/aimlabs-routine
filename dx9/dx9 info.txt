@@ -1,0 +1,3 @@
+if it aims at the toes for dx9 config change hitpart to head
+or uppertorso
+use right click

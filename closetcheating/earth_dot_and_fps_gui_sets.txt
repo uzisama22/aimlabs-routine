@@ -1,0 +1,50 @@
+Fps Gui
+__________________________________
+517 -0.3
+__________________________________
+543.4 -0.3
+__________________________________
+850 -0.6
+1200 -0.6
+__________________________________
+Earth Cam Lock fps gui set
+1 -0.1
+bullet Speed :951015
+__________________________________
+Earth Known Sets
+first -  4000 -3
+second - 0.0459 -0.3
+__________________________________
+Earth Very Smooth sets
+Speed :0.0356 
+current ballistics :0.1
+bullet speed = 505
+__________________________________
+Dot Sets
+       // -- = -- sets  -- = -- \\
+      |       earth  - 0.5152    |
+      |       earth  - 0.8162    |
+      |       earth  - 0.851     |
+      |       earth  - 0.720     |
+      |       earth  - 0.7615    |
+      |       earth - 0.1256     |     
+      |       earth - 0.761      |     
+      |       earth - 0.251      |
+      // -- = -- holy  -- = -- \\
+    
+__________________________________
+Earth Sens:
+0.09688
+0.010015
+Earth Slow Sens :
+0.0582
+0.07512
+0.041
+Earth DPI for fast sens:
+400
+Earth DPI for slow sens:
+600 
+871
+900
+__________________________________
+links : https://media.discordapp.net/attachments/869753341482250260/920450013254017055/unknown.png

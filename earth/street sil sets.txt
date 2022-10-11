@@ -1,0 +1,17 @@
+THIS IS SILENT STREAMABLE
+Streamable sets:
+( there isnt really much to say ab this if u dont find these good u can experiment with diffrent 1's this is prediction value )
+accomidationfactor = 0.12567724521
+accomidationfactor = 0.14573463
+accomidationfactor = 0.14356
+accomidationfactor = 0.133
+accomidationfactor = 0.1381674
+whqn's main prediction set
+accomidationfactor = 0.13453391634
+( this is fov aka ( hit radious ) you dont want this to be huge then it will look hella unlegit beacuse u will be hitting everyone around ur target, u dont want it to low either beacuse then it ownt help much )
+ValiantAimHacks.FOV = 11
+ValiantAimHacks.FOV = 9
+ValiantAimHacks.FOV = 15
+ValiantAimHacks.FOV = 14
+main set
+ValiantAimHacks.FOV = 10
